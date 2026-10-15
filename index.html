@@ -997,6 +997,7 @@ html:not(.gs) .rv.in{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
     </nav>
     <div class="tbr">
       <button class="vbtn" id="vbtn" type="button" aria-expanded="false" aria-controls="vpan" aria-label="Озвучка"><svg class="ic"><use href="#i-headphones"/></svg><span>TR</span></button>
+      
       <a class="pillbtn" href="#practice"><svg class="ic"><use href="#i-trophy"/></svg><span class="tx">Практика</span></a>
     </div>
   </div>
@@ -1427,10 +1428,12 @@ html:not(.gs) .rv.in{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
     <p class="otxt" style="margin-top:12px;font-size:15px">воздух + порт + его + буфер + куда</p>
     <div class="cta">
       <a class="btn lime" href="#builder"><svg class="ic"><use href="#i-blocks"/></svg> Ещё раз в конструктор</a>
+      
       <a class="btn ghost" href="#top"><svg class="ic"><use href="#i-arrow-up"/></svg> Наверх</a>
     </div>
   </div>
 </section>
+
 </main>
 
 <footer class="foot">
@@ -1439,6 +1442,8 @@ html:not(.gs) .rv.in{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
     <span>Видео: <a href="https://www.youtube.com/watch?v=IrekQKolSB8" target="_blank" rel="noopener">SEVE SEVE TÜRKÇE</a> · <a href="https://www.youtube.com/watch?v=wQ15wtB4KfU" target="_blank" rel="noopener">Турецкий кот</a> · <a href="https://www.youtube.com/watch?v=BsqdFSJW23M" target="_blank" rel="noopener">Московская академия наук</a></span>
   </div>
 </footer>
+
+
 
 <script>
 function trInit(){
@@ -1858,7 +1863,7 @@ function trInit(){
     var s = res.filter(Boolean).length;
     var msg = s === 6 ? 'Шесть из шести. Таксист бы не переспросил.' : s >= 4 ? 'Почти. Загляни в шаг 06, там все звуки на стыках.' : 'Нормально. Хвостики кусаются только сначала. Покрути конструктор и попробуй ещё раз.';
     qz.innerHTML = bar() + '<div class="qres"><div class="score">' + s + '/6 <svg class="ic"><use href="#i-trophy"/></svg></div><p>' + msg + '</p>' +
-      '<div class="cta"><button type="button" class="btn lime" id="again"><svg class="ic"><use href="#i-repeat"/></svg> Ещё раз</button><a class="btn ghost" href="#builder">Конструктор</a></div></div>';
+      '<div class="cta"><button type="button" class="btn lime" id="again"><svg class="ic"><use href="#i-repeat"/></svg> Ещё раз</button>' + (document.getElementById('platform') ? '<a class="btn ghost" href="#platform">Что дальше</a>' : '<a class="btn ghost" href="#builder">Конструктор</a>') + '</div></div>';
     $('#again').onclick = function(){ qi = 0; res = []; drawQ(); };
     if(G){ G.from('.qres .score', {scale:.3, rotation:-20, duration:1, ease:'elastic.out(1,.4)'}); confetti(qz, s*8); }
   }
@@ -1917,6 +1922,49 @@ function trInit(){
   });
   if(G) ScrollTrigger.batch('.lc, .at', {start:'top 92%', once:true, onEnter:function(b){ G.from(b, {y:50, rotation:function(i){ return (i%2?1:-1)*3; }, duration:.7, ease:'back.out(1.8)', stagger:.06}); }});
 
+
+  /* ---------- platform ad (only when present) ---------- */
+  if($('#platform')){
+    var d32 = $('#dots32'), lvCol = ['#C9F05A','#A8D13A','#3D66EA','#2451DA','#0A0A0A'], ex = [9,6,5,7,5];
+    d32.innerHTML = ex.map(function(n,k){ var s = ''; for(var j=0;j<n;j++) s += '<i style="background:'+lvCol[k]+(k===4?';box-shadow:inset 0 0 0 1.5px #555':'')+'" title="'+['A1','A2','B1','B2','C1'][k]+'"></i>'; return s; }).join('');
+    if(G) G.from($$('i', d32), {scale:.3, duration:.4, ease:'back.out(3)', stagger:.025, scrollTrigger:{trigger:d32, start:'top 92%', once:true}});
+
+    var TYPES = [['Фильмы','film',[25,27,47,138,194]],['Книги','book-open',[17,34,79,124,159]],['Мультики','tv',[70,93,61,8,0]],['Подкасты','podcast',[8,14,18,20,34]],['Приложения','smartphone',[53,91,119,103,78]],['YouTube','youtube',[34,20,17,12,19]]];
+    var LVP = ['Уровень A1. Мультики и приложения, чтобы начать слышать язык.','Уровень A2. Мультиков ещё больше. Появляются книги.','Уровень B1. Книги и приложения. Мультики уже скучно.','Уровень B2. Фильмы и книги. Ты смотришь кино без перевода.','Уровень C1. 194 фильма и 159 книг. Тут уже живут на турецком.'];
+    var bars = $('#bars'), MX = 194, cur = 0;
+    bars.innerHTML = TYPES.map(function(t){ return '<div class="br"><span class="bn"><svg class="ic"><use href="#i-'+t[1]+'"/></svg>'+t[0]+'</span><span class="bt"><i style="width:0%"></i></span><span class="bv">0</span></div>'; }).join('');
+    function setLv(l, anim){
+      cur = l; var tot = 0;
+      $$('#lvt button').forEach(function(b){ b.classList.toggle('on', +b.dataset.l === l); });
+      $$('.br', bars).forEach(function(r,k){
+        var v = TYPES[k][2][l]; tot += v;
+        $('.bt i', r).style.width = Math.max(v ? 2 : 0, v/MX*100) + '%';
+        var bv = $('.bv', r), from = +bv.textContent || 0;
+        if(G && anim){ var o = {v:from}; G.to(o, {v:v, duration:.8, ease:'power2.out', onUpdate:function(){ bv.textContent = Math.round(o.v); }}); } else bv.textContent = v;
+      });
+      var lvN = $('#lvN'), f = +lvN.textContent || 0;
+      if(G && anim){ var o2 = {v:f}; G.to(o2, {v:tot, duration:.9, ease:'power2.out', onUpdate:function(){ lvN.textContent = Math.round(o2.v); }}); G.fromTo('#lvP', {y:10}, {y:0, duration:.5, ease:'back.out(2)'}); } else lvN.textContent = tot;
+      $('#lvP').textContent = LVP[l];
+    }
+    $$('#lvt button').forEach(function(b){ b.onclick = function(){ setLv(+b.dataset.l, true); }; });
+    $('#lvN').textContent = '0';
+    if(G) ScrollTrigger.create({trigger:bars, start:'top 85%', once:true, onEnter:function(){ setLv(0, true); }});
+    else setLv(0, false);
+
+    var BF = [['Грамматика',58,70],['Новая лексика',43,28],['Лексика',28,32],['Слова',11,9],['Тексты',10,8],['Диалоги',10,5],['Аудирование',8,7],['Игры на слова',9,0],['Экзамены',15,17]];
+    $('#bfr').innerHTML = BF.map(function(r){ return '<div class="bfr"><div class="l"><span'+(r[1]?'':' class="zero"')+'>'+r[1]+'</span><b class="tk"><i style="width:'+(r[1]/70*100)+'%"></i></b></div><div class="lab">'+r[0]+'</div><div class="r"><b class="tk"><i style="width:'+(r[2]/70*100)+'%"></i></b><span'+(r[2]?'':' class="zero"')+'>'+(r[2]||'—')+'</span></div></div>'; }).join('');
+    $$('.bfr i').forEach(function(i){ if(i.style.width === '0%') i.style.minWidth = '0'; });
+    if(G) G.from('.bfr i', {scaleX:0, duration:.9, ease:'power3.out', stagger:.05, scrollTrigger:{trigger:'#bf', start:'top 80%', once:true}});
+
+    var dock = $('#dock'), priceSec = $('#price');
+    if(dock && 'IntersectionObserver' in window){
+      document.documentElement.classList.add('hasdock');
+      var pastHero = false, atPrice = false;
+      function updD(){ var s = pastHero && !atPrice; dock.classList.toggle('show', s); dock.setAttribute('aria-hidden', !s); $('a', dock).tabIndex = s ? 0 : -1; }
+      new IntersectionObserver(function(es){ es.forEach(function(en){ pastHero = !en.isIntersecting && en.boundingClientRect.top < 0; updD(); }); }).observe($('.hero'));
+      new IntersectionObserver(function(es){ es.forEach(function(en){ atPrice = en.isIntersecting; updD(); }); }).observe(priceSec);
+    }
+  }
 
   if(G){
     var rf = function(){ ScrollTrigger.refresh(); ticks(); upd(); };
